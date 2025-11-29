@@ -10,7 +10,7 @@ export default function Footer() {
                         <p>Premium Ethnic Wear</p>
                     </div>
                     <div className={styles.contact}>
-                        <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className={styles.whatsapp}>
+                        <a href="https://wa.me/918179572442" target="_blank" rel="noopener noreferrer" className={styles.whatsapp}>
                             <span className={styles.icon}>📱</span> Chat on WhatsApp
                         </a>
                     </div>
