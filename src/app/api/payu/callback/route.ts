@@ -102,7 +102,8 @@ export async function POST(request: Request) {
         }
 
         // If payment is successful, create order
-        if (status === 'success') {
+        // Use case-insensitive comparison since PayU sends 'Success' but we use 'success' for hash
+        if (status?.toLowerCase() === 'success') {
             console.log('Payment successful, creating order...');
             console.log('Order details:', { sareeId, amount, userEmail, shippingAddress, mihpayid });
 
