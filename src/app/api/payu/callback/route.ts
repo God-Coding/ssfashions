@@ -7,18 +7,33 @@ export async function POST(request: Request) {
     try {
         console.log('PayU callback received');
 
-        // Try to parse as JSON first, then fall back to form data
-        let data: any;
-        const contentType = request.headers.get('content-type') || '';
+        // Get raw body text
+        const bodyText = await request.text();
+        console.log('Raw body received, length:', bodyText.length);
 
+        let data: any = {};
+        const contentType = request.headers.get('content-type') || '';
+        console.log('Content-Type:', contentType);
+
+        // Parse based on content type
         if (contentType.includes('application/json')) {
-            data = await request.json();
+            data = JSON.parse(bodyText);
             console.log('Parsed as JSON');
+        } else if (contentType.includes('application/x-www-form-urlencoded') || bodyText.includes('=')) {
+            // Parse URL-encoded data manually
+            const params = new URLSearchParams(bodyText);
+            data = Object.fromEntries(params.entries());
+            console.log('Parsed as URL-encoded');
         } else {
-            // Parse as form data
-            const formData = await request.formData();
-            data = Object.fromEntries(formData.entries());
-            console.log('Parsed as form data');
+            // Try to parse as JSON anyway
+            try {
+                data = JSON.parse(bodyText);
+                console.log('Parsed as JSON (fallback)');
+            } catch {
+                console.error('Could not parse body, treating as URL-encoded');
+                const params = new URLSearchParams(bodyText);
+                data = Object.fromEntries(params.entries());
+            }
         }
 
         console.log('Callback data received:', {
