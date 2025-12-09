@@ -5,24 +5,44 @@ import crypto from 'crypto';
 
 export async function POST(request: Request) {
     try {
-        const formData = await request.formData();
+        console.log('PayU callback received');
+
+        // Try to parse as JSON first, then fall back to form data
+        let data: any;
+        const contentType = request.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+            data = await request.json();
+            console.log('Parsed as JSON');
+        } else {
+            // Parse as form data
+            const formData = await request.formData();
+            data = Object.fromEntries(formData.entries());
+            console.log('Parsed as form data');
+        }
+
+        console.log('Callback data received:', {
+            status: data.status,
+            txnid: data.txnid,
+            amount: data.amount
+        });
 
         // Extract PayU response parameters
-        const status = formData.get('status')?.toString();
-        const txnid = formData.get('txnid')?.toString();
-        const amount = formData.get('amount')?.toString();
-        const productinfo = formData.get('productinfo')?.toString();
-        const firstname = formData.get('firstname')?.toString();
-        const email = formData.get('email')?.toString();
-        const mihpayid = formData.get('mihpayid')?.toString(); // PayU payment ID
-        const hash = formData.get('hash')?.toString();
+        const status = data.status?.toString();
+        const txnid = data.txnid?.toString();
+        const amount = data.amount?.toString();
+        const productinfo = data.productinfo?.toString();
+        const firstname = data.firstname?.toString();
+        const email = data.email?.toString();
+        const mihpayid = data.mihpayid?.toString(); // PayU payment ID
+        const hash = data.hash?.toString();
 
         // UDF fields containing order details
-        const sareeId = formData.get('udf1')?.toString();
-        const shippingAddress = formData.get('udf2')?.toString();
-        const userEmail = formData.get('udf3')?.toString();
-        const udf4 = formData.get('udf4')?.toString() || '';
-        const udf5 = formData.get('udf5')?.toString() || '';
+        const sareeId = data.udf1?.toString();
+        const shippingAddress = data.udf2?.toString();
+        const userEmail = data.udf3?.toString();
+        const udf4 = data.udf4?.toString() || '';
+        const udf5 = data.udf5?.toString() || '';
 
         const merchantSalt = process.env.PAYU_MERCHANT_SALT;
         const merchantKey = process.env.PAYU_MERCHANT_KEY;
