@@ -42,22 +42,36 @@ export async function POST(request: Request) {
             amount: data.amount
         });
 
-        // Extract PayU response parameters
-        const status = data.status?.toString();
-        const txnid = data.txnid?.toString();
-        const amount = data.amount?.toString();
-        const productinfo = data.productinfo?.toString();
-        const firstname = data.firstname?.toString();
-        const email = data.email?.toString();
-        const mihpayid = data.mihpayid?.toString(); // PayU payment ID
-        const hash = data.hash?.toString();
+        // Log ALL fields to see what PayU is actually sending
+        console.log('All webhook fields:', Object.keys(data));
+        console.log('Full webhook data:', JSON.stringify(data, null, 2));
+
+        // Extract PayU response parameters - try different possible field names
+        const status = data.status || data.Status || data.STATUS;
+        const txnid = data.txnid || data.transaction_id || data.transactionId || data.id;
+        const amount = data.amount || data.Amount;
+        const productinfo = data.productinfo || data.product_info;
+        const firstname = data.firstname || data.first_name || data.name;
+        const email = data.email || data.Email;
+        const mihpayid = data.mihpayid || data.payuMoneyId || data.payment_id;
+        const hash = data.hash || data.Hash;
 
         // UDF fields containing order details
-        const sareeId = data.udf1?.toString();
-        const shippingAddress = data.udf2?.toString();
-        const userEmail = data.udf3?.toString();
-        const udf4 = data.udf4?.toString() || '';
-        const udf5 = data.udf5?.toString() || '';
+        const sareeId = data.udf1 || data.UDF1;
+        const shippingAddress = data.udf2 || data.UDF2;
+        const userEmail = data.udf3 || data.UDF3;
+        const udf4 = data.udf4 || data.UDF4 || '';
+        const udf5 = data.udf5 || data.UDF5 || '';
+
+        console.log('Extracted values:', {
+            status,
+            txnid,
+            amount,
+            mihpayid,
+            sareeId,
+            shippingAddress,
+            userEmail
+        });
 
         const merchantSalt = process.env.PAYU_MERCHANT_SALT;
         const merchantKey = process.env.PAYU_MERCHANT_KEY;
