@@ -46,6 +46,9 @@ export default async function Header() {
                     {session?.user && (
                         <Link href="/orders" className={styles.link}>📦 My Orders</Link>
                     )}
+                    {session?.user && (
+                        <Link href="/admin/orders" className={styles.link} style={{ color: '#800000', fontWeight: 'bold' }}>Admin</Link>
+                    )}
                     <a href="https://wa.me/918179572442" target="_blank" rel="noopener noreferrer" className={`btn ${styles.contactBtn}`}>
                         Contact Us
                     </a>
