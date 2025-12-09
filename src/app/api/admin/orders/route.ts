@@ -27,7 +27,7 @@ export async function GET() {
                 o.OrderID, o.OrderDate, o.Status, o.Amount, o.PaymentMethod, o.PaymentStatus,
                 s.Name as SareeName, s.ImageURL,
                 u.Name as UserName, u.Email as UserEmail,
-                o.Address
+                o.ShippingAddress as Address
             FROM Orders o
             LEFT JOIN Sarees s ON o.SareeID = s.SareeID
             LEFT JOIN Users u ON o.UserID = u.UserID

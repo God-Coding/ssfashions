@@ -27,6 +27,57 @@ export default function ProductDetails({ saree, userEmail }: { saree: Saree, use
             return;
         }
 
+        // For online payment, initiate PayU payment
+        if (paymentMethod === 'Online') {
+            setLoading(true);
+            try {
+                // Call PayU initiation API
+                const response = await fetch('/api/payu/initiate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sareeId: saree.SareeID,
+                        sareeName: saree.Name,
+                        amount: saree.Price,
+                        userEmail: userEmail,
+                        shippingAddress: address,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.paymentData) {
+                    // Create a form and submit to PayU
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.payuUrl;
+
+                    // Add all payment data as hidden fields
+                    Object.keys(data.paymentData).forEach(key => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = data.paymentData[key];
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    alert('Failed to initiate payment: ' + (data.error || 'Unknown error'));
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('Payment initiation error:', error);
+                alert('An error occurred while initiating payment.');
+                setLoading(false);
+            }
+            return;
+        }
+
+        // For COD, proceed with order placement
         setLoading(true);
         try {
             const response = await fetch('/api/orders', {
@@ -60,6 +111,7 @@ export default function ProductDetails({ saree, userEmail }: { saree: Saree, use
             setLoading(false);
         }
     };
+
 
     return (
         <div className="container" style={{ padding: '40px 20px' }}>
@@ -187,7 +239,7 @@ export default function ProductDetails({ saree, userEmail }: { saree: Saree, use
                                         checked={paymentMethod === 'Online'}
                                         onChange={(e) => setPaymentMethod(e.target.value)}
                                     />
-                                    Online Payment (UPI, Cards, NetBanking)
+                                    Online Payment (PayU - UPI/Cards/Net Banking)
                                 </label>
                             </div>
 
