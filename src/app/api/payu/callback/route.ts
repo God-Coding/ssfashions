@@ -113,16 +113,21 @@ export async function POST(request: Request) {
 
                 // Get user ID if email exists
                 let userId = null;
+                console.log('Looking up user by email:', userEmail);
                 if (userEmail) {
                     const userResult = await pool.request()
                         .input('email', sql.NVarChar, userEmail)
-                        .query("SELECT UserID FROM Users WHERE Email = @email");
+                        .query("SELECT UserID, Name, Email FROM Users WHERE Email = @email");
+                    console.log('User query result:', userResult.recordset);
                     if (userResult.recordset.length > 0) {
                         userId = userResult.recordset[0].UserID;
-                        console.log('User found:', userId);
+                        console.log('✅ User found! UserID:', userId, 'Name:', userResult.recordset[0].Name);
                     } else {
-                        console.log('User not found for email:', userEmail);
+                        console.log('❌ User not found for email:', userEmail);
+                        console.log('⚠️ Order will be created without UserID. User needs to sign in with this email to see the order.');
                     }
+                } else {
+                    console.log('❌ No userEmail provided in webhook data');
                 }
 
                 // Insert order
