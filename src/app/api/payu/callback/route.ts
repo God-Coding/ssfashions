@@ -44,24 +44,23 @@ export async function POST(request: Request) {
 
         // Log ALL fields to see what PayU is actually sending
         console.log('All webhook fields:', Object.keys(data));
-        console.log('Full webhook data:', JSON.stringify(data, null, 2));
 
-        // Extract PayU response parameters - try different possible field names
-        const status = data.status || data.Status || data.STATUS;
-        const txnid = data.txnid || data.transaction_id || data.transactionId || data.id;
-        const amount = data.amount || data.Amount;
-        const productinfo = data.productinfo || data.product_info;
-        const firstname = data.firstname || data.first_name || data.name;
-        const email = data.email || data.Email;
-        const mihpayid = data.mihpayid || data.payuMoneyId || data.payment_id;
-        const hash = data.hash || data.Hash;
+        // Extract PayU response parameters using CORRECT field names from webhook
+        const status = data.status;
+        const txnid = data.merchantTransactionId; // PayU uses merchantTransactionId, not txnid
+        const amount = data.amount;
+        const productinfo = data.productInfo; // PayU uses productInfo (capital I)
+        const firstname = data.customerName; // PayU uses customerName
+        const email = data.customerEmail; // PayU uses customerEmail
+        const mihpayid = data.paymentId; // PayU uses paymentId
+        const hash = data.hash;
 
         // UDF fields containing order details
-        const sareeId = data.udf1 || data.UDF1;
-        const shippingAddress = data.udf2 || data.UDF2;
-        const userEmail = data.udf3 || data.UDF3;
-        const udf4 = data.udf4 || data.UDF4 || '';
-        const udf5 = data.udf5 || data.UDF5 || '';
+        const sareeId = data.udf1;
+        const shippingAddress = data.udf2;
+        const userEmail = data.udf3;
+        const udf4 = data.udf4 || '';
+        const udf5 = data.udf5 || '';
 
         console.log('Extracted values:', {
             status,
