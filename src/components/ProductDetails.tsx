@@ -22,6 +22,13 @@ export default function ProductDetails({ saree, userEmail }: { saree: Saree, use
     const images = saree.ImageURL ? saree.ImageURL.split(',').map(url => url.trim()).filter(Boolean) : [];
 
     const handleOrder = async () => {
+        // Check if user is signed in
+        if (!userEmail) {
+            alert('Please sign in to place an order.');
+            router.push('/auth/signin');
+            return;
+        }
+
         if (!address) {
             alert('Please enter your shipping address.');
             return;
