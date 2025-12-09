@@ -81,12 +81,14 @@ export async function POST(request: Request) {
         }
 
         // Verify hash for security
-        // Reverse hash format: salt|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
-        const reverseHashString = `${merchantSalt}|${status}||||||${udf5}|${udf4}|${userEmail}|${shippingAddress}|${sareeId}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${merchantKey}`;
+        // PayU Webhook hash format: salt|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
+        // Note: status should be lowercase in hash calculation
+        const statusLower = status?.toLowerCase() || 'success';
+        const reverseHashString = `${merchantSalt}|${statusLower}||||||${udf5}|${udf4}|${userEmail}|${shippingAddress}|${sareeId}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${merchantKey}`;
         const calculatedHash = crypto.createHash('sha512').update(reverseHashString).digest('hex');
 
         console.log('PayU Callback - Hash Verification:', {
-            status,
+            status: statusLower,
             txnid,
             receivedHash: hash,
             calculatedHash,
@@ -95,6 +97,7 @@ export async function POST(request: Request) {
 
         if (calculatedHash !== hash) {
             console.error('Hash mismatch - possible tampering');
+            console.error('Hash string used:', reverseHashString);
             return NextResponse.redirect(new URL('/payment/failure?error=hash', request.url));
         }
 
