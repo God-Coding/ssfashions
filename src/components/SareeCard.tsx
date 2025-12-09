@@ -24,6 +24,7 @@ export default function SareeCard({ saree, isTrending }: SareeCardProps) {
     const { data: session } = useSession();
     const [inWishlist, setInWishlist] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [navigating, setNavigating] = useState(false);
 
     // Parse ImageURL to get the first image
     const imageUrl = saree.ImageURL ? saree.ImageURL.split(',')[0].trim() : '';
@@ -86,8 +87,16 @@ export default function SareeCard({ saree, isTrending }: SareeCardProps) {
         }
     };
 
+    const handleCardClick = (e: React.MouseEvent) => {
+        // Don't navigate if clicking wishlist button
+        if ((e.target as HTMLElement).closest('button')) {
+            return;
+        }
+        setNavigating(true);
+    };
+
     return (
-        <Link href={`/product/${saree.SareeID}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href={`/product/${saree.SareeID}`} style={{ textDecoration: 'none', color: 'inherit' }} onClick={handleCardClick}>
             <div style={{
                 border: '1px solid #eee',
                 borderRadius: '8px',
@@ -97,8 +106,39 @@ export default function SareeCard({ saree, isTrending }: SareeCardProps) {
                 position: 'relative',
                 height: '100%',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                cursor: navigating ? 'wait' : 'pointer'
             }}>
+                {/* Loading Overlay */}
+                {navigating && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10
+                    }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            border: '4px solid rgba(128, 0, 0, 0.1)',
+                            borderTop: '4px solid #800000',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }} />
+                        <style jsx>{`
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        `}</style>
+                    </div>
+                )}
                 <div style={{ position: 'relative', paddingTop: '133%' /* 3:4 Aspect Ratio */ }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
